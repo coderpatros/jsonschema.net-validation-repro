@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Json.Schema;
 
 var spdxSchemaString = File.ReadAllText("spdx.schema.json");
@@ -16,21 +16,15 @@ var validationOptions = new ValidationOptions
     RequireFormatValidation = true
 };
 
-try
+var jsonDocument = JsonDocument.Parse(jsonString);
+var result = cdxSchema.Validate(jsonDocument.RootElement, validationOptions);
+if (result.IsValid)
 {
-    var jsonDocument = JsonDocument.Parse(jsonString);
-    var result = cdxSchema.Validate(jsonDocument.RootElement, validationOptions);
-    if (result.IsValid)
-    {
-        Console.WriteLine($"Valid JSON for you! {result.Message}");
-    }
-    else
-    {
-        Console.WriteLine("NO VALID JSON FOR YOU!!!");
-
-    }
+    // This is expected
+    Console.WriteLine($"Valid JSON for you! {result.Message}");
 }
-catch (JsonException exc)
+else
 {
-    Console.WriteLine($"{exc.Message}");
+    // This is not expected
+    Console.WriteLine("NO VALID JSON FOR YOU!!!");
 }
