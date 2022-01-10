@@ -1,0 +1,36 @@
+﻿using System.Text.Json;
+using Json.Schema;
+
+var spdxSchemaString = File.ReadAllText("spdx.schema.json");
+var cdxSchemaString = File.ReadAllText("bom-1.2.schema.json");
+var jsonString = File.ReadAllText("valid-metadata-tool-1.2.json");
+
+var spdxSchema = JsonSchema.FromText(spdxSchemaString);
+SchemaRegistry.Global.Register(new Uri("file://spdx.schema.json"), spdxSchema);
+
+var cdxSchema = JsonSchema.FromText(cdxSchemaString);
+
+var validationOptions = new ValidationOptions
+{
+    OutputFormat = OutputFormat.Detailed,
+    RequireFormatValidation = true
+};
+
+try
+{
+    var jsonDocument = JsonDocument.Parse(jsonString);
+    var result = cdxSchema.Validate(jsonDocument.RootElement, validationOptions);
+    if (result.IsValid)
+    {
+        Console.WriteLine($"Valid JSON for you! {result.Message}");
+    }
+    else
+    {
+        Console.WriteLine("NO VALID JSON FOR YOU!!!");
+
+    }
+}
+catch (JsonException exc)
+{
+    Console.WriteLine($"{exc.Message}");
+}
